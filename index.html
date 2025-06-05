@@ -19,7 +19,7 @@
             background: #2d2d2d; /* Darker track */
         }
         ::-webkit-scrollbar-thumb {
-            background: #fbbf24; /* Amber thumb (amber-400) */
+            background: #fbbfbf24; /* Amber thumb (amber-400) */
             border-radius: 4px;
         }
         ::-webkit-scrollbar-thumb:hover {
@@ -104,8 +104,12 @@
 </head>
 <body class="bg-gray-900 text-gray-100 min-h-screen flex flex-col">
     <!-- Header Section -->
-    <header class="bg-gray-800 p-8 shadow-lg rounded-b-xl mx-4 mt-4 flex justify-center items-center">
+    <header class="bg-gray-800 p-8 shadow-lg rounded-b-xl mx-4 mt-4 flex justify-center items-center relative">
         <h1 class="text-5xl font-bold text-amber-400">Alex's Media Server</h1>
+        <!-- Version Number -->
+        <div class="absolute top-4 right-4 text-gray-400 text-sm">
+            v1.0.0
+        </div>
     </header>
 
     <!-- Main Content Wrapper - Initially Hidden -->
