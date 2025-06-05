@@ -114,7 +114,7 @@
         <h1 class="text-5xl font-bold text-amber-400">Alex's Media Server</h1>
         <!-- Version Number -->
         <div class="absolute top-4 right-4 text-gray-400 text-sm">
-            v1.0.0
+            v1.0.1
         </div>
     </header>
 
@@ -132,7 +132,7 @@
                         Can't find that movie or show on the server? Submit your requests here! We'll do our best to get it added for everyone to enjoy.
                     </p>
                     <!-- Changed from <a> with href to <button> for JS handling -->
-                    <button class="service-link inline-block bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 px-8 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-opacity-75" data-service="overseerr">
+                    <button class="service-link inline-block bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 px-8 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-opacity-75" data-service="1">
                         Request Something!
                     </button>
                 </div>
@@ -149,7 +149,7 @@
                         Dive into our vast collection of movies, TV shows, and more! Everything you love, organized and ready to stream instantly.
                     </p>
                     <!-- Changed from <a> with href to <button> for JS handling -->
-                    <button class="service-link inline-block bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 px-8 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-opacity-75" data-service="plex">
+                    <button class="service-link inline-block bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 px-8 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-opacity-75" data-service="2">
                         Watch Now!
                     </button>
                 </div>
@@ -166,7 +166,7 @@
                         Prefer listening? Explore our growing library of audiobooks and podcasts, all ready for you to enjoy on the go.
                     </p>
                     <!-- Changed from <a> with href to <button> for JS handling -->
-                    <button class="service-link inline-block bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 px-8 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-opacity-75" data-service="audiobookshelf">
+                    <button class="service-link inline-block bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 px-8 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-opacity-75" data-service="3">
                         Listen Up!
                     </button>
                 </div>
@@ -316,7 +316,7 @@
                     return;
                 }
 
-                const serviceName = event.currentTarget.dataset.service; // Get the service name from data-service attribute
+                const serviceId = event.currentTarget.dataset.service; // Get the service ID from data-service attribute
 
                 // Send request to the Worker's redirect endpoint
                 try {
@@ -327,25 +327,25 @@
                         },
                         body: JSON.stringify({
                             password: storedMasterCode, // Send the stored master code for verification
-                            service: serviceName       // Send the requested service name
+                            serviceId: serviceId       // Send the requested service ID
                         }),
                     });
 
                     // Cloudflare Worker is designed to return a 302 Found status with the Location header
                     // if the redirection is successful. The browser will automatically follow this redirect.
                     if (response.status === 302) {
-                        console.log(`Successfully requested redirect for service: ${serviceName}`);
+                        console.log(`Successfully requested redirect for service ID: ${serviceId}`);
                         // The browser will handle the redirect automatically due to the 302 status code and Location header.
                     } else {
                         // Handle cases where the Worker doesn't return a 302 (e.g., 401, 404, 500)
                         const errorData = await response.json();
-                        alert(`Failed to access ${serviceName}: ${errorData.message || 'Unknown error'}`);
-                        console.error(`Failed to access ${serviceName}:`, errorData);
+                        alert(`Failed to access service (ID: ${serviceId}): ${errorData.message || 'Unknown error'}`);
+                        console.error(`Failed to access service (ID: ${serviceId}):`, errorData);
                     }
                 } catch (error) {
                     // Handle network errors or other unexpected issues
-                    alert(`An error occurred while trying to access ${serviceName}. Please try again.`);
-                    console.error(`Error accessing ${serviceName} service:`, error);
+                    alert(`An error occurred while trying to access service (ID: ${serviceId}). Please try again.`);
+                    console.error(`Error accessing service (ID: ${serviceId}):`, error);
                 }
             });
         });
