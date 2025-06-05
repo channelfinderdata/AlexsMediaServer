@@ -191,9 +191,8 @@
         const serviceLinks = document.querySelectorAll('.service-link'); // Select all service buttons
 
         // IMPORTANT: This is the URL of your deployed Cloudflare Worker.
-        // It's crucial that this URL is correct.
-        // Example: "https://verify-master-code-worker.your-subdomain.workers.dev"
-        const WORKER_BASE_URL = "https://verify-master-code-worker.authme.workers.dev/"; // Placeholder, update with your actual Worker URL
+        // This URL has been updated based on your input.
+        const WORKER_BASE_URL = "https://verify-master-code-worker.authme.workers.dev";
 
         let storedMasterCode = ''; // To store the code after successful authentication
         let retryCount = 0;
@@ -325,17 +324,8 @@
                     // Cloudflare Worker is designed to return a 302 Found status with the Location header
                     // if the redirection is successful. The browser will automatically follow this redirect.
                     if (response.status === 302) {
-                        // The browser automatically follows 302 redirects.
-                        // We don't need to do window.location.href here if the worker sends a 302.
-                        // However, if your worker was sending the URL in the JSON body,
-                        // you would extract it here:
-                        // const data = await response.json();
-                        // if (data.success && data.redirectUrl) {
-                        //    window.location.href = data.redirectUrl;
-                        // } else {
-                        //    alert(data.message || 'Failed to get redirect URL.');
-                        // }
                         console.log(`Successfully requested redirect for service: ${serviceName}`);
+                        // The browser will handle the redirect automatically due to the 302 status code and Location header.
                     } else {
                         // Handle cases where the Worker doesn't return a 302 (e.g., 401, 404, 500)
                         const errorData = await response.json();
