@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alex's Media Server</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom CSS to set the Inter font family */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom scrollbar for a cleaner look, matching the new palette */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #2d2d2d; /* Darker track */
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #fbbf24; /* Amber thumb (amber-400) */
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #fcd34d; /* Lighter amber on hover (amber-300) */
+        }
+        /* Custom class for the transparent haze effect around round images */
+        .haze-effect {
+            /* Softer, more diffused shadow for blending */
+            box-shadow: 0 0 15px 5px rgba(251, 191, 36, 0.3); /* Amber-400 with 30% opacity, larger blur, smaller spread */
+            transition: transform 0.3s ease-out, box-shadow 0.3s ease-out; /* Smooth transition for hover effects */
+            will-change: transform; /* Optimize for animation performance */
+        }
+
+        /* Flutter effect on hover */
+        .haze-effect:hover {
+            transform: translateY(-5px); /* Moves slightly up */
+            box-shadow: 0 0 25px 8px rgba(251, 191, 36, 0.5); /* Haze becomes more prominent on hover */
+        }
+
+        /* Container for the 3D rotation effect */
+        .logo-3d-container {
+            position: relative;
+            /* Add perspective to the parent for 3D effect */
+            perspective: 1000px;
+            /* Ensure children are transformed in 3D space */
+            transform-style: preserve-3d;
+        }
+
+        /* Image within the 3D container */
+        .logo-3d-container img {
+            transition: transform 0.1s linear; /* Smoother, quicker transition for rotation */
+            transform-style: preserve-3d; /* Keep the image itself in 3D space */
+            /* Set transform origin to the center for natural rotation */
+            transform-origin: center center;
+        }
+
+        /* Modal specific styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9); /* Darker overlay to truly hide content */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+        }
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background-color: #1f2937; /* gray-800 */
+            padding: 2rem;
+            border-radius: 0.75rem; /* rounded-xl */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            max-width: 90%;
+            width: 400px;
+            text-align: center;
+            position: relative;
+            transform: translateY(-20px);
+            transition: transform 0.3s ease-in-out;
+        }
+        .modal-overlay.show .modal-content {
+            transform: translateY(0);
+        }
+        /* Hide the close button for the initial gatekeeping modal */
+        .modal-close-btn {
+            display: none; /* Hide close button for mandatory entry */
+        }
+
+        /* Style to hide main content initially */
+        .hidden-content {
+            display: none;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen flex flex-col">
+    <!-- Header Section -->
+    <header class="bg-gray-800 p-8 shadow-lg rounded-b-xl mx-4 mt-4 flex justify-center items-center">
+        <h1 class="text-5xl font-bold text-amber-400">Alex's Media Server</h1>
+    </header>
+
+    <!-- Main Content Wrapper - Initially Hidden -->
+    <div id="mainContentWrapper" class="hidden-content flex-grow flex flex-col">
+        <main class="flex-grow container mx-auto p-4 md:p-8 space-y-12">
+            <!-- Overseerr Section -->
+            <section id="overseerr" class="bg-gray-800 p-6 md:p-10 rounded-xl shadow-xl border border-amber-700 hover:border-amber-500 transition-all duration-300 flex flex-col md:flex-row items-center justify-center md:justify-between space-y-6 md:space-y-0 md:space-x-10 overflow-hidden">
+                <div class="flex-shrink-0 logo-3d-container">
+                    <img src="https://getumbrel.github.io/umbrel-apps-gallery/overseerr/icon.svg" alt="Overseerr Logo" class="w-24 h-24 md:w-32 md:h-32 object-contain rounded-full haze-effect" data-rotation-strength="25">
+                </div>
+                <div class="flex-grow text-center md:text-left">
+                    <h2 class="text-4xl font-semibold text-amber-400 mb-4">Overseerr</h2>
+                    <p class="text-gray-300 leading-relaxed mb-6 max-w-2xl mx-auto md:mx-0">
+                        Can't find that movie or show on the server? Submit your requests here! We'll do our best to get it added for everyone to enjoy.
+                    </p>
+                    <a href="https://requestit.alexsaudiosite.win/" target="_blank" rel="noopener noreferrer"
+                       class="inline-block bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 px-8 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-opacity-75">
+                        Request Something!
+                    </a>
+                </div>
+            </section>
+
+            <!-- Plex Section -->
+            <section id="plex" class="bg-gray-800 p-6 md:p-10 rounded-xl shadow-xl border border-amber-700 hover:border-amber-500 transition-all duration-300 flex flex-col md:flex-row-reverse items-center justify-center md:justify-between space-y-6 md:space-y-0 md:space-x-reverse md:space-x-10 overflow-hidden">
+                <div class="flex-shrink-0 logo-3d-container">
+                    <img src="https://i.redd.it/5x93lknmuaw81.jpg" alt="Plex Logo" class="w-24 h-24 md:w-32 md:h-32 object-contain rounded-full haze-effect" data-rotation-strength="25">
+                </div>
+                <div class="flex-grow text-center md:text-right">
+                    <h2 class="text-4xl font-semibold text-amber-400 mb-4">Plex Media Server</h2>
+                    <p class="text-gray-300 leading-relaxed mb-6 max-w-2xl mx-auto md:mx-0">
+                        Dive into our vast collection of movies, TV shows, and more! Everything you love, organized and ready to stream instantly.
+                    </p>
+                    <a href="https://app.plex.tv" target="_blank" rel="noopener noreferrer"
+                       class="inline-block bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 px-8 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-opacity-75">
+                        Watch Now!
+                    </a>
+                </div>
+            </section>
+
+            <!-- Audiobookshelf Section -->
+            <section id="audiobookshelf" class="bg-gray-800 p-6 md:p-10 rounded-xl shadow-xl border border-amber-700 hover:border-amber-500 transition-all duration-300 flex flex-col md:flex-row items-center justify-center md:justify-between space-y-6 md:space-y-0 md:space-x-10 overflow-hidden">
+                <div class="flex-shrink-0 logo-3d-container">
+                    <img src="https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/68/a8/14/68a814c2-2f2c-db51-deb1-545b818e67a9/Icons-1x_U007emarketing-0-8-0-85-220-0.png/1920x1080bb-80.png" alt="Audiobookshelf Logo" class="w-24 h-24 md:w-32 md:h-32 object-contain rounded-full haze-effect" data-rotation-strength="25">
+                </div>
+                <div class="flex-grow text-center md:text-left">
+                    <h2 class="text-4xl font-semibold text-amber-400 mb-4">Audiobookshelf</h2>
+                    <p class="text-gray-300 leading-relaxed mb-6 max-w-2xl mx-auto md:mx-0">
+                        Prefer listening? Explore our growing library of audiobooks and podcasts, all ready for you to enjoy on the go.
+                    </p>
+                    <a href="https://flared.alexsaudiosite.win/" target="_blank" rel="noopener noreferrer"
+                       class="inline-block bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 px-8 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-opacity-75">
+                        Listen Up!
+                    </a>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Master Code Modal -->
+    <div id="masterCodeModal" class="modal-overlay show"> <!-- 'show' class added by default -->
+        <div class="modal-content">
+            <h3 class="text-2xl font-bold text-amber-400 mb-4">Access Alex's Media Server</h3>
+            <p class="text-gray-300 mb-4">
+                Please enter the master code to access the server.
+            </p>
+            <input type="password" id="masterCodeInput" placeholder="Enter code here"
+                   class="w-full p-3 mb-4 rounded-lg bg-gray-700 text-gray-100 border border-gray-600 focus:outline-none focus:border-amber-500">
+            <button id="submitMasterCode"
+                    class="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 px-8 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-opacity-75">
+                Unlock Server
+            </button>
+            <p id="masterCodeMessage" class="text-gray-300 mt-4"></p>
+        </div>
+    </div>
+
+    <script type="module">
+        // Master Code Modal Logic
+        const masterCodeModal = document.getElementById('masterCodeModal');
+        const masterCodeInput = document.getElementById('masterCodeInput');
+        const submitMasterCodeBtn = document.getElementById('submitMasterCode');
+        const masterCodeMessage = document.getElementById('masterCodeMessage');
+        const mainContentWrapper = document.getElementById('mainContentWrapper');
+
+        // IMPORTANT: This is the URL of your deployed Firebase Cloud Function.
+        // It's crucial that this URL is correct for your authentication to work.
+        const CLOUD_FUNCTION_URL = "https://verifymastercode-4jbxjaviwa-uc.a.run.app/";
+
+        let retryCount = 0;
+        const MAX_RETRIES = 3;
+
+        // Function to initialize 3D logo effects (called only after successful login)
+        function initialize3DEffects() {
+            const sections = document.querySelectorAll('section'); // Query sections after content is visible
+
+            sections.forEach(section => {
+                const logoContainer = section.querySelector('.logo-3d-container');
+                const img = logoContainer ? logoContainer.querySelector('img') : null;
+
+                if (img) {
+                    const rotationStrength = parseFloat(img.dataset.rotationStrength) || 10;
+
+                    logoContainer.addEventListener('mousemove', (e) => {
+                        const rect = logoContainer.getBoundingClientRect();
+                        const centerX = rect.left + rect.width / 2;
+                        const centerY = rect.top + rect.height / 2;
+                        const mouseX = e.clientX;
+                        const mouseY = e.clientY;
+
+                        const offsetX = (mouseX - centerX) / (rect.width / 2);
+                        const offsetY = (mouseY - centerY) / (rect.height / 2);
+
+                        const rotateY = offsetX * rotationStrength;
+                        const rotateX = -offsetY * rotationStrength;
+
+                        img.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+                    });
+
+                    logoContainer.addEventListener('mouseleave', () => {
+                        img.style.transform = `rotateX(0deg) rotateY(0deg)`;
+                    });
+                }
+            });
+        }
+
+        // Submit code
+        submitMasterCodeBtn.addEventListener('click', async () => {
+            const userEnteredCode = masterCodeInput.value; // Get the code from input field
+
+            // Basic validation for Cloud Function URL (should be set correctly by now)
+            if (!CLOUD_FUNCTION_URL || CLOUD_FUNCTION_URL === "YOUR_CLOUD_FUNCTION_ENDPOINT_HERE") {
+                masterCodeMessage.textContent = "Error: Cloud Function URL not configured. Please set it up.";
+                masterCodeMessage.style.color = '#ef4444';
+                return; // Stop execution if URL is not set
+            }
+
+            try {
+                // Send the user's entered code to your Cloud Function for verification.
+                // The Cloud Function will handle the secure comparison.
+                const response = await fetch(CLOUD_FUNCTION_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ password: userEnteredCode }), // Send as 'password' to match Cloud Function's expectation
+                });
+
+                const data = await response.json(); // Parse the JSON response from the Cloud Function
+
+                if (response.ok && data.success) { // Check if the Cloud Function returned success
+                    masterCodeMessage.textContent = "Success! Welcome to Alex's Media Server!";
+                    masterCodeMessage.style.color = '#10b981'; // Green color for success
+                    masterCodeInput.style.borderColor = '#10b981'; // Green border on success
+
+                    // Hide modal and show main content after a short delay
+                    setTimeout(() => {
+                        masterCodeModal.classList.remove('show');
+                        mainContentWrapper.classList.remove('hidden-content');
+                        // Initialize 3D effects once content is visible
+                        initialize3DEffects(); // Call this to activate the interactive logos
+                    }, 700); // Give time for message to be read
+
+                } else {
+                    // If response is not OK or data.success is false, throw an error
+                    throw new Error(data.message || "Authentication failed.");
+                }
+
+            } catch (error) {
+                retryCount++;
+                console.error("Authentication error:", error); // Log error for debugging purposes
+
+                if (retryCount >= MAX_RETRIES) {
+                    masterCodeMessage.textContent = "Too many incorrect attempts. Access denied.";
+                    masterCodeMessage.style.color = '#dc2626'; // Red color for error
+                    masterCodeInput.disabled = true; // Disable input
+                    submitMasterCodeBtn.disabled = true; // Disable button
+                    masterCodeInput.style.borderColor = '#dc2626'; // Red border for disabled input
+                    submitMasterCodeBtn.classList.remove('bg-amber-600', 'hover:bg-amber-700');
+                    submitMasterCodeBtn.classList.add('bg-gray-500', 'cursor-not-allowed'); // Grey out button
+                } else {
+                    masterCodeMessage.textContent = `Incorrect code. ${MAX_RETRIES - retryCount} attempts remaining.`;
+                    masterCodeMessage.style.color = '#ef4444'; // Red color for error
+                    masterCodeInput.style.borderColor = '#ef4444'; // Red border for incorrect input
+                }
+            }
+        });
+
+        // Ensure modal is visible on page load and focus input
+        document.addEventListener('DOMContentLoaded', () => {
+            masterCodeModal.classList.add('show');
+            masterCodeInput.focus(); // Focus on the input field for immediate typing
+        });
+    </script>
+</body>
+</html>
