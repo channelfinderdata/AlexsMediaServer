@@ -3,72 +3,155 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alex's Media Server</title>
-    <!-- Load Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>~:: Alex's Media Server ::~</title>
+    <!-- Retro Favicon (e.g., a pixelated floppy disk or simple shape) -->
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%230000FF'%3E%3Cpath d='M21 4H7a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V6a2 2 0 00-2-2zM7 6h14v14H7V6zm3 2h8v2h-8V8zm0 4h8v2h-8v-2zm0 4h5v2h-5v-2z'/%3E%3C/svg%3E" type="image/svg+xml">
     <style>
-        /* Custom CSS to set the Inter font family */
+        /* Basic Reset */
+        body, h1, h2, h3, p, button, input, select {
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', 'Helvetica Neue', Helvetica, sans-serif; /* Classic web-safe font */
+        }
+
         body {
-            font-family: 'Inter', sans-serif;
+            background-color: #C0C0C0; /* Windows 95/98 grey */
+            color: #000000; /* Default black text */
+            line-height: 1.5;
+            font-size: 14px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
             overflow: hidden; /* Prevent scrolling when modal/blocked overlay is active */
         }
-        /* Custom scrollbar for a cleaner look, matching the new palette */
+
+        /* Scrollbar (updated for retro look) */
         ::-webkit-scrollbar {
-            width: 8px;
+            width: 14px; /* Wider scrollbar */
+            height: 14px;
         }
         ::-webkit-scrollbar-track {
-            background: #2d2d2d; /* Darker track */
+            background: #DFDFDF; /* Lighter track */
+            border: 1px solid #808080; /* Grey border */
         }
         ::-webkit-scrollbar-thumb {
-            background: #fbbfbf24; /* Amber thumb (amber-400) */
-            border-radius: 4px;
+            background: #A0A0A0; /* Darker grey thumb */
+            border: 1px solid #404040; /* Dark border for 3D effect */
+            border-right-color: #FFFFFF;
+            border-bottom-color: #FFFFFF;
         }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #fcd34d; /* Lighter amber on hover (amber-300) */
-        }
-        /* Custom class for the transparent haze effect around round images */
-        .haze-effect {
-            /* Softer, more diffused shadow for blending */
-            box-shadow: 0 0 15px 5px rgba(251, 191, 36, 0.3); /* Amber-400 with 30% opacity, larger blur, smaller spread */
-            transition: transform 0.3s ease-out, box-shadow 0.3s ease-out; /* Smooth transition for hover effects */
-            will-change: transform; /* Optimize for animation performance */
+        ::-webkit-scrollbar-thumb:active {
+            background: #808080; /* Even darker on active */
         }
 
-        /* Flutter effect on hover */
-        .haze-effect:hover {
-            transform: translateY(-5px); /* Moves slightly up */
-            box-shadow: 0 0 25px 8px rgba(251, 191, 36, 0.5); /* Haze becomes more prominent on hover */
-        }
-
-        /* Container for the 3D rotation effect */
-        .logo-3d-container {
+        /* Header */
+        header {
+            background-color: #000080; /* Deep blue header */
+            color: #FFFFFF; /* White text */
+            padding: 10px 20px;
+            border-bottom: 2px solid #000000;
+            text-align: center;
             position: relative;
-            /* Add perspective to the parent for 3D effect */
-            perspective: 1000px;
-            /* Ensure children are transformed in 3D space */
-            transform-style: preserve-3d;
+            z-index: 1000;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5); /* Hard shadow */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap; /* Allow wrapping on small screens */
+        }
+        header h1 {
+            font-size: 32px;
+            font-weight: bold;
+            text-shadow: 2px 2px 0 #FF0000; /* Red shadow for "pop" */
+            flex-grow: 1; /* Allow title to take space */
+        }
+        header .version-number {
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            font-size: 10px;
+            color: #AAAAAA; /* Lighter grey for version */
         }
 
-        /* Image within the 3D container */
-        .logo-3d-container img {
-            transition: transform 0.1s linear; /* Smoother, quicker transition for rotation */
-            transform-style: preserve-3d; /* Keep the image itself in 3D space */
-            /* Set transform origin to the center for natural rotation */
-            transform-origin: center center;
+        /* Main Content Wrapper */
+        #mainContentWrapper {
+            flex-grow: 1;
+            padding: 15px;
+            overflow-y: auto; /* Allow scrolling for main content */
         }
 
-        /* Modal specific styles */
+        /* Sections (simulating nested boxes) */
+        section {
+            background-color: #E0E0E0; /* Lighter grey for sections */
+            border: 2px solid #808080;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 3px 3px 0 #404040; /* Stronger shadow */
+            text-align: center; /* Center content in sections */
+        }
+        section h2 {
+            font-size: 24px;
+            color: #000080; /* Dark blue heading */
+            margin-bottom: 10px;
+            text-decoration: underline; /* Classic underline */
+        }
+        section p {
+            color: #333333;
+            margin-bottom: 15px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Service Links (Buttons) */
+        .service-link {
+            display: inline-block;
+            background-color: #008080; /* Teal/cyan button */
+            color: #FFFFFF;
+            font-weight: bold;
+            padding: 8px 20px;
+            border: 2px outset #000000; /* Classic button outset border */
+            text-decoration: none;
+            cursor: pointer;
+            transition: background-color 0.1s ease-in-out, border-style 0.1s ease-in-out;
+            box-shadow: 2px 2px 0 #404040;
+        }
+        .service-link:hover {
+            background-color: #00A0A0; /* Lighter teal on hover */
+            border-style: inset; /* Inset on hover */
+        }
+        .service-link:active {
+            background-color: #006060; /* Darker teal on active */
+            border-style: inset;
+        }
+
+        /* Service Logos (simple and blocky) */
+        .service-logo {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            margin-bottom: 10px;
+            border: 1px solid #808080; /* Simple border */
+            background-color: #F0F0F0; /* Light background for logo */
+            padding: 5px;
+            box-shadow: 2px 2px 0 #404040;
+            display: block; /* Ensure it takes full width */
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Master Code Modal */
         .modal-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.9); /* Darker overlay to truly hide content */
+            background-color: rgba(0, 0, 0, 0.75); /* Dark overlay */
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 1005; /* Modal overlay is above main content but below header */
+            z-index: 1005;
             opacity: 0;
             visibility: hidden;
             transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
@@ -78,55 +161,89 @@
             visibility: visible;
         }
         .modal-content {
-            background-color: #1f2937; /* gray-800 */
-            padding: 2rem;
-            border-radius: 0.75rem; /* rounded-xl */
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            max-width: 90%;
-            width: 400px;
+            background-color: #E0E0E0; /* Modal background same as sections */
+            padding: 20px;
+            border: 2px solid #808080;
+            box-shadow: 4px 4px 0 #404040; /* Stronger shadow for modal */
+            max-width: 350px;
+            width: 90%;
             text-align: center;
             position: relative;
             transform: translateY(-20px);
             transition: transform 0.3s ease-in-out;
-            z-index: 1010; /* Modal content is above the overlay */
+            z-index: 1010;
         }
         .modal-overlay.show .modal-content {
             transform: translateY(0);
         }
-        /* Hide the close button for the initial gatekeeping modal */
-        .modal-close-btn {
-            display: none; /* Hide close button for mandatory entry */
+        .modal-content h3 {
+            font-size: 20px;
+            color: #000080;
+            margin-bottom: 15px;
+            text-decoration: underline;
+        }
+        .modal-content p {
+            color: #333333;
+            margin-bottom: 15px;
+        }
+        .modal-content input[type="password"] {
+            width: calc(100% - 20px); /* Adjust for padding */
+            padding: 8px 10px;
+            margin-bottom: 15px;
+            border: 2px inset #808080; /* Inset border for input */
+            background-color: #FFFFFF;
+            color: #000000;
+            outline: none;
+            box-sizing: border-box; /* Include padding and border in width */
+        }
+        .modal-content button {
+            width: 100%;
+            padding: 10px 15px;
+            background-color: #800080; /* Purple button for modal action */
+            color: #FFFFFF;
+            font-weight: bold;
+            border: 2px outset #000000;
+            cursor: pointer;
+            transition: background-color 0.1s ease-in-out, border-style 0.1s ease-in-out;
+            box-shadow: 2px 2px 0 #404040;
+        }
+        .modal-content button:hover {
+            background-color: #A000A0;
+            border-style: inset;
+        }
+        .modal-content button:active {
+            background-color: #600060;
+            border-style: inset;
+        }
+        .modal-content button:disabled {
+            background-color: #A0A0A0; /* Grey out disabled button */
+            cursor: not-allowed;
+            border-style: outset; /* Keep outset */
+            box-shadow: none; /* No shadow */
         }
 
-        /* Style to hide main content and modal initially */
+        /* Hide elements initially */
         .hidden-element {
             display: none;
         }
 
-        /* Ensure header is positioned for z-index to work */
-        header {
-            position: relative;
-            z-index: 1000; /* Header is above blocked overlay and modal overlay */
-        }
-
-        /* New style for the full-screen IP blocked message */
+        /* Blocked IP Overlay */
         .blocked-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.95); /* Even darker overlay */
+            background-color: #000000; /* Solid black for denial */
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            z-index: 1005; /* Same as modal overlay, ensuring it covers main content */
-            color: #ef4444; /* red-500 */
-            font-size: 2.5rem;
+            z-index: 1005;
+            color: #FF0000; /* Bright red text */
+            font-size: 24px;
             text-align: center;
-            padding: 2rem;
-            line-height: 1.5;
+            padding: 20px;
             opacity: 0;
             visibility: hidden;
             transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
@@ -135,78 +252,79 @@
             opacity: 1;
             visibility: visible;
         }
+        .blocked-overlay h2 {
+            font-size: 48px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-shadow: 3px 3px 0 #800000; /* Darker red shadow */
+        }
+        .blocked-overlay p {
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: #FF8080; /* Lighter red for body text */
+        }
+
+        /* Ensure header is positioned for z-index to work (already done) */
+        /* Body overflow handling */
+        body.modal-open {
+            overflow: hidden;
+        }
     </style>
 </head>
 <body class="bg-gray-900 text-gray-100 min-h-screen flex flex-col">
 
     <!-- Blocked IP Overlay - Initially Hidden -->
     <div id="blockedIpOverlay" class="blocked-overlay hidden-element">
-        <h2 class="text-5xl font-bold mb-4">Access Denied!</h2>
+        <h2>Access Denied!</h2>
         <p>Your IP address has been blocked from entering this site due to repeated failed attempts.</p>
-        <p class="text-sm mt-4 text-gray-400">Please contact the administrator if you believe this is an error.</p>
+        <p style="font-size: 12px; color: #CCCCCC; margin-top: 20px;">Please contact the administrator if you believe this is an error.</p>
     </div>
 
     <!-- Header Section -->
-    <header class="bg-gray-800 p-8 shadow-lg rounded-b-xl mx-4 mt-4 flex justify-center items-center relative">
-        <h1 class="text-5xl font-bold text-amber-400">Alex's Media Server</h1>
-        <!-- Version Number -->
-        <div class="absolute top-4 right-4 text-gray-400 text-sm">
-            v1.0.3
+    <header>
+        <h1>Alex's Media Server</h1>
+        <div class="version-number">
+            v1.0.4
         </div>
     </header>
 
     <!-- Main Content Wrapper - Initially Hidden -->
-    <div id="mainContentWrapper" class="flex-grow flex flex-col hidden-element">
-        <main class="flex-grow container mx-auto p-4 md:p-8 space-y-12">
+    <div id="mainContentWrapper" class="hidden-element">
+        <main class="container mx-auto p-4 space-y-8">
             <!-- Overseerr Section -->
-            <section id="overseerr" class="bg-gray-800 p-6 md:p-10 rounded-xl shadow-xl border border-amber-700 hover:border-amber-500 transition-all duration-300 flex flex-col md:flex-row items-center justify-center md:justify-between space-y-6 md:space-y-0 md:space-x-10 overflow-hidden">
-                <div class="flex-shrink-0 logo-3d-container">
-                    <img src="https://getumbrel.github.io/umbrel-apps-gallery/overseerr/icon.svg" alt="Overseerr Logo" class="w-24 h-24 md:w-32 md:h-32 object-contain rounded-full haze-effect" data-rotation-strength="25">
-                </div>
-                <div class="flex-grow text-center md:text-left">
-                    <h2 class="text-4xl font-semibold text-amber-400 mb-4">Overseerr</h2>
-                    <p class="text-gray-300 leading-relaxed mb-6 max-w-2xl mx-auto md:mx-0">
-                        Can't find that movie or show on the server? Submit your requests here! We'll do our best to get it added for everyone to enjoy.
-                    </p>
-                    <!-- Changed from <a> with href to <button> for JS handling -->
-                    <button class="service-link inline-block bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 px-8 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-opacity-75" data-service="1">
-                        Request Something!
-                    </button>
-                </div>
+            <section id="overseerr">
+                <img src="https://getumbrel.github.io/umbrel-apps-gallery/overseerr/icon.svg" alt="Overseerr Logo" class="service-logo">
+                <h2>Overseerr</h2>
+                <p>
+                    Can't find that movie or show on the server? Submit your requests here! We'll do our best to get it added for everyone to enjoy.
+                </p>
+                <button class="service-link" data-service="1">
+                    Request Something!
+                </button>
             </section>
 
             <!-- Plex Section -->
-            <section id="plex" class="bg-gray-800 p-6 md:p-10 rounded-xl shadow-xl border border-amber-700 hover:border-amber-500 transition-all duration-300 flex flex-col md:flex-row-reverse items-center justify-center md:justify-between space-y-6 md:space-y-0 md:space-x-reverse md:space-x-10 overflow-hidden">
-                <div class="flex-shrink-0 logo-3d-container">
-                    <img src="https://i.redd.it/5x93lknmuaw81.jpg" alt="Plex Logo" class="w-24 h-24 md:w-32 md:h-32 object-contain rounded-full haze-effect" data-rotation-strength="25">
-                </div>
-                <div class="flex-grow text-center md:text-right">
-                    <h2 class="text-4xl font-semibold text-amber-400 mb-4">Plex Media Server</h2>
-                    <p class="text-gray-300 leading-relaxed mb-6 max-w-2xl mx-auto md:mx-0">
-                        Dive into our vast collection of movies, TV shows, and more! Everything you love, organized and ready to stream instantly.
-                    </p>
-                    <!-- Changed from <a> with href to <button> for JS handling -->
-                    <button class="service-link inline-block bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 px-8 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-opacity-75" data-service="2">
-                        Watch Now!
-                    </button>
-                </div>
+            <section id="plex">
+                <img src="https://i.redd.it/5x93lknmuaw81.jpg" alt="Plex Logo" class="service-logo">
+                <h2>Plex Media Server</h2>
+                <p>
+                    Dive into our vast collection of movies, TV shows, and more! Everything you love, organized and ready to stream instantly.
+                </p>
+                <button class="service-link" data-service="2">
+                    Watch Now!
+                </button>
             </section>
 
             <!-- Audiobookshelf Section -->
-            <section id="audiobookshelf" class="bg-gray-800 p-6 md:p-10 rounded-xl shadow-xl border border-amber-700 hover:border-amber-500 transition-all duration-300 flex flex-col md:flex-row items-center justify-center md:justify-between space-y-6 md:space-y-0 md:space-x-10 overflow-hidden">
-                <div class="flex-shrink-0 logo-3d-container">
-                    <img src="https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/68/a8/14/68a814c2-2f2c-db51-deb1-545b818e67a9/Icons-1x_U007emarketing-0-8-0-85-220-0.png/1920x1080bb-80.png" alt="Audiobookshelf Logo" class="w-24 h-24 md:w-32 md:h-32 object-contain rounded-full haze-effect" data-rotation-strength="25">
-                </div>
-                <div class="flex-grow text-center md:text-left">
-                    <h2 class="text-4xl font-semibold text-amber-400 mb-4">Audiobookshelf</h2>
-                    <p class="text-gray-300 leading-relaxed mb-6 max-w-2xl mx-auto md:mx-0">
-                        Prefer listening? Explore our growing library of audiobooks and podcasts, all ready for you to enjoy on the go.
-                    </p>
-                    <!-- Changed from <a> with href to <button> for JS handling -->
-                    <button class="service-link inline-block bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 px-8 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-opacity-75" data-service="3">
-                        Listen Up!
-                    </button>
-                </div>
+            <section id="audiobookshelf">
+                <img src="https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/68/a8/14/68a814c2-2f2c-db51-deb1-545b818e67a9/Icons-1x_U007emarketing-0-8-0-85-220-0.png/1920x1080bb-80.png" alt="Audiobookshelf Logo" class="service-logo">
+                <h2>Audiobookshelf</h2>
+                <p>
+                    Prefer listening? Explore our growing library of audiobooks and podcasts, all ready for you to enjoy on the go.
+                </p>
+                <button class="service-link" data-service="3">
+                    Listen Up!
+                </button>
             </section>
         </main>
     </div>
@@ -214,17 +332,15 @@
     <!-- Master Code Modal - Initially Hidden -->
     <div id="masterCodeModal" class="modal-overlay hidden-element">
         <div class="modal-content">
-            <h3 class="text-2xl font-bold text-amber-400 mb-4">Access Alex's Media Server</h3>
-            <p class="text-gray-300 mb-4">
+            <h3>Access Alex's Media Server</h3>
+            <p>
                 Please enter the master code to access the server.
             </p>
-            <input type="password" id="masterCodeInput" placeholder="Enter code here"
-                   class="w-full p-3 mb-4 rounded-lg bg-gray-700 text-gray-100 border border-gray-600 focus:outline-none focus:border-amber-500">
-            <button id="submitMasterCode"
-                    class="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 px-8 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-opacity-75">
+            <input type="password" id="masterCodeInput" placeholder="Enter code here">
+            <button id="submitMasterCode">
                 Unlock Server
             </button>
-            <p id="masterCodeMessage" class="text-gray-300 mt-4"></p>
+            <p id="masterCodeMessage" style="color: #000000; margin-top: 10px;"></p>
         </div>
     </div>
 
@@ -245,87 +361,48 @@
         let retryCount = 0;
         const MAX_RETRIES = 3;
 
-        // Function to initialize 3D logo effects (called only after successful login)
-        function initialize3DEffects() {
-            const sections = document.querySelectorAll('section');
-
-            sections.forEach(section => {
-                const logoContainer = section.querySelector('.logo-3d-container');
-                const img = logoContainer ? logoContainer.querySelector('img') : null;
-
-                if (img) {
-                    const rotationStrength = parseFloat(img.dataset.rotationStrength) || 10;
-
-                    logoContainer.addEventListener('mousemove', (e) => {
-                        const rect = logoContainer.getBoundingClientRect();
-                        const centerX = rect.left + rect.width / 2;
-                        const centerY = rect.top + rect.height / 2;
-                        const mouseX = e.clientX;
-                        const mouseY = e.clientY;
-
-                        const offsetX = (mouseX - centerX) / (rect.width / 2);
-                        const offsetY = (mouseY - centerY) / (rect.height / 2);
-
-                        const rotateY = offsetX * rotationStrength;
-                        const rotateX = -offsetY * rotationStrength;
-
-                        img.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-                    });
-
-                    logoContainer.addEventListener('mouseleave', () => {
-                        img.style.transform = `rotateX(0deg) rotateY(0deg)`;
-                    });
-                }
-            });
-        }
-
-        // --- NEW: Function to check IP status on page load ---
+        // Function to check IP status on page load
         async function checkIpStatus() {
             try {
                 const response = await fetch(`${WORKER_BASE_URL}/checkIpStatus`, {
-                    method: 'POST', // Use POST as defined in Worker
+                    method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    // No body needed for this specific check, as IP is from CF-Connecting-IP
-                    body: JSON.stringify({}) // Send an empty JSON object for valid POST request
+                    body: JSON.stringify({})
                 });
 
                 const data = await response.json();
 
                 if (response.ok && data.status === 'blocked') {
-                    // Show the blocked IP overlay
                     blockedIpOverlay.classList.remove('hidden-element');
                     blockedIpOverlay.classList.add('show');
-                    // Hide any other elements that might appear by default (like the modal)
                     masterCodeModal.classList.add('hidden-element');
                     masterCodeModal.classList.remove('show');
-                    mainContentWrapper.classList.add('hidden-element'); // Ensure main content is hidden
-                    document.body.style.overflow = 'hidden'; // Keep body fixed
+                    mainContentWrapper.classList.add('hidden-element');
+                    document.body.classList.add('modal-open'); // Add class to body to prevent scrolling
                 } else {
-                    // IP is allowed, show the master code modal
                     masterCodeModal.classList.remove('hidden-element');
                     masterCodeModal.classList.add('show');
-                    document.body.style.overflow = 'hidden'; // Keep body fixed
+                    document.body.classList.add('modal-open'); // Add class to body to prevent scrolling
                 }
             } catch (error) {
                 console.error("Error checking IP status:", error);
-                // If there's an error checking IP status, default to showing the login modal
                 masterCodeMessage.textContent = "Error communicating with server. Please try again later.";
-                masterCodeMessage.style.color = '#ef4444';
+                masterCodeMessage.style.color = '#FF0000'; /* Bright red for error */
                 masterCodeModal.classList.remove('hidden-element');
                 masterCodeModal.classList.add('show');
-                document.body.style.overflow = 'hidden'; // Keep body fixed
+                document.body.classList.add('modal-open');
             }
         }
 
-        // --- Event Listener for initial Master Code submission ---
+        // Event Listener for initial Master Code submission
         submitMasterCodeBtn.addEventListener('click', async () => {
             const userEnteredCode = masterCodeInput.value;
 
             if (!WORKER_BASE_URL) {
                 masterCodeMessage.textContent = "Error: Worker URL not configured.";
-                masterCodeMessage.style.color = '#ef4444';
+                masterCodeMessage.style.color = '#FF0000';
                 return;
             }
 
@@ -341,18 +418,17 @@
                 const data = await response.json();
 
                 if (response.ok && data.success) {
-                    masterCodeMessage.textContent = "Success! Welcome to Alex's Media Server!";
-                    masterCodeMessage.style.color = '#10b981';
-                    masterCodeInput.style.borderColor = '#10b981';
+                    masterCodeMessage.textContent = "Access Granted! Welcome!";
+                    masterCodeMessage.style.color = '#008000'; /* Green for success */
+                    masterCodeInput.style.borderColor = '#008000';
 
                     storedMasterCode = userEnteredCode;
 
                     setTimeout(() => {
                         masterCodeModal.classList.remove('show');
-                        masterCodeModal.classList.add('hidden-element'); // Ensure it's fully hidden
-                        mainContentWrapper.classList.remove('hidden-element'); // Show main content
-                        document.body.style.overflow = 'auto'; // Allow scrolling on main content
-                        initialize3DEffects();
+                        masterCodeModal.classList.add('hidden-element');
+                        mainContentWrapper.classList.remove('hidden-element');
+                        document.body.classList.remove('modal-open'); // Allow scrolling
                     }, 700);
 
                 } else {
@@ -365,28 +441,26 @@
 
                 if (retryCount >= MAX_RETRIES) {
                     masterCodeMessage.textContent = "Too many incorrect attempts. Your IP has been blocked.";
-                    masterCodeMessage.style.color = '#dc2626';
+                    masterCodeMessage.style.color = '#FF0000';
                     masterCodeInput.disabled = true;
                     submitMasterCodeBtn.disabled = true;
-                    masterCodeInput.style.borderColor = '#dc2626';
-                    submitMasterCodeBtn.classList.remove('bg-amber-600', 'hover:bg-amber-700');
-                    submitMasterCodeBtn.classList.add('bg-gray-500', 'cursor-not-allowed');
+                    masterCodeInput.style.borderColor = '#FF0000';
+                    submitMasterCodeBtn.classList.add('disabled-button'); /* New class for disabled */
 
-                    // If IP is blocked by worker, immediately transition to blocked overlay
                     if (error.message.includes('Your IP has been blocked')) {
                         setTimeout(() => {
                             masterCodeModal.classList.remove('show');
                             masterCodeModal.classList.add('hidden-element');
                             blockedIpOverlay.classList.remove('hidden-element');
                             blockedIpOverlay.classList.add('show');
-                            document.body.style.overflow = 'hidden'; // Ensure body remains fixed
+                            document.body.classList.add('modal-open');
                         }, 700);
                     }
 
                 } else {
                     masterCodeMessage.textContent = `Incorrect code. ${MAX_RETRIES - retryCount} attempts remaining.`;
-                    masterCodeMessage.style.color = '#ef4444';
-                    masterCodeInput.style.borderColor = '#ef4444';
+                    masterCodeMessage.style.color = '#FF0000';
+                    masterCodeInput.style.borderColor = '#FF0000';
                 }
             }
         });
