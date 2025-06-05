@@ -22,7 +22,7 @@
             display: flex;
             flex-direction: column;
             min-height: 100vh;
-            overflow: hidden; /* Prevent scrolling when modal/blocked overlay is active */
+            /* Removed default overflow: hidden; from body, will manage with .modal-open */
         }
 
         /* Scrollbar (updated for retro look) */
@@ -264,14 +264,15 @@
             color: #FF8080; /* Lighter red for body text */
         }
 
-        /* Ensure header is positioned for z-index to work (already done) */
         /* Body overflow handling */
         body.modal-open {
-            overflow: hidden;
+            overflow: hidden; /* Prevent scrolling when modal is active */
         }
     </style>
 </head>
-<body class="bg-gray-900 text-gray-100 min-h-screen flex flex-col">
+<body>
+    <!-- Audio for unlock sound -->
+    <audio id="unlockSound" src="https://drive.google.com/uc?export=download&id=1rqLlJ5kGUQaJxyjerfxp_GhtoSHog7oO" preload="auto"></audio>
 
     <!-- Blocked IP Overlay - Initially Hidden -->
     <div id="blockedIpOverlay" class="blocked-overlay hidden-element">
@@ -284,7 +285,7 @@
     <header>
         <h1>Alex's Media Server</h1>
         <div class="version-number">
-            v1.0.4
+            v1.0.5
         </div>
     </header>
 
@@ -346,6 +347,7 @@
 
     <script type="module">
         // Element references
+        const unlockSound = document.getElementById('unlockSound'); // Reference to the audio element
         const blockedIpOverlay = document.getElementById('blockedIpOverlay');
         const masterCodeModal = document.getElementById('masterCodeModal');
         const masterCodeInput = document.getElementById('masterCodeInput');
@@ -421,6 +423,9 @@
                     masterCodeMessage.textContent = "Access Granted! Welcome!";
                     masterCodeMessage.style.color = '#008000'; /* Green for success */
                     masterCodeInput.style.borderColor = '#008000';
+
+                    // Play unlock sound
+                    unlockSound.play().catch(e => console.error("Error playing unlock sound:", e));
 
                     storedMasterCode = userEnteredCode;
 
