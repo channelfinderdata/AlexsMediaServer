@@ -121,10 +121,10 @@
                     <p class="text-gray-300 leading-relaxed mb-6 max-w-2xl mx-auto md:mx-0">
                         Can't find that movie or show on the server? Submit your requests here! We'll do our best to get it added for everyone to enjoy.
                     </p>
-                    <a href="https://requestit.alexsaudiosite.win/" target="_blank" rel="noopener noreferrer"
-                       class="inline-block bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 px-8 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-opacity-75">
+                    <!-- Changed from <a> with href to <button> for JS handling -->
+                    <button class="service-link inline-block bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 px-8 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-opacity-75" data-service="overseerr">
                         Request Something!
-                    </a>
+                    </button>
                 </div>
             </section>
 
@@ -138,10 +138,10 @@
                     <p class="text-gray-300 leading-relaxed mb-6 max-w-2xl mx-auto md:mx-0">
                         Dive into our vast collection of movies, TV shows, and more! Everything you love, organized and ready to stream instantly.
                     </p>
-                    <a href="https://app.plex.tv" target="_blank" rel="noopener noreferrer"
-                       class="inline-block bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 px-8 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-opacity-75">
+                    <!-- Changed from <a> with href to <button> for JS handling -->
+                    <button class="service-link inline-block bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 px-8 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-opacity-75" data-service="plex">
                         Watch Now!
-                    </a>
+                    </button>
                 </div>
             </section>
 
@@ -155,10 +155,10 @@
                     <p class="text-gray-300 leading-relaxed mb-6 max-w-2xl mx-auto md:mx-0">
                         Prefer listening? Explore our growing library of audiobooks and podcasts, all ready for you to enjoy on the go.
                     </p>
-                    <a href="https://flared.alexsaudiosite.win/" target="_blank" rel="noopener noreferrer"
-                       class="inline-block bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 px-8 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-opacity-75">
+                    <!-- Changed from <a> with href to <button> for JS handling -->
+                    <button class="service-link inline-block bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 px-8 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-opacity-75" data-service="audiobookshelf">
                         Listen Up!
-                    </a>
+                    </button>
                 </div>
             </section>
         </main>
@@ -188,11 +188,14 @@
         const submitMasterCodeBtn = document.getElementById('submitMasterCode');
         const masterCodeMessage = document.getElementById('masterCodeMessage');
         const mainContentWrapper = document.getElementById('mainContentWrapper');
+        const serviceLinks = document.querySelectorAll('.service-link'); // Select all service buttons
 
-        // IMPORTANT: This is the URL of your deployed Firebase Cloud Function.
-        // It's crucial that this URL is correct for your authentication to work.
-        const CLOUD_FUNCTION_URL = "https://verify-master-code-worker.authme.workers.dev/";
+        // IMPORTANT: This is the URL of your deployed Cloudflare Worker.
+        // It's crucial that this URL is correct.
+        // Example: "https://verify-master-code-worker.your-subdomain.workers.dev"
+        const WORKER_BASE_URL = "https://verify-master-code-worker.authme.workers.dev/"; // Placeholder, update with your actual Worker URL
 
+        let storedMasterCode = ''; // To store the code after successful authentication
         let retryCount = 0;
         const MAX_RETRIES = 3;
 
@@ -230,72 +233,121 @@
             });
         }
 
-        // Submit code
+        // --- Event Listener for initial Master Code submission ---
         submitMasterCodeBtn.addEventListener('click', async () => {
-            const userEnteredCode = masterCodeInput.value; // Get the code from input field
+            const userEnteredCode = masterCodeInput.value;
 
-            // Basic validation for Cloud Function URL (should be set correctly by now)
-            if (!CLOUD_FUNCTION_URL || CLOUD_FUNCTION_URL === "YOUR_CLOUD_FUNCTION_ENDPOINT_HERE") {
-                masterCodeMessage.textContent = "Error: Cloud Function URL not configured. Please set it up.";
+            // Simple check to ensure the WORKER_BASE_URL is updated from its placeholder
+            if (!WORKER_BASE_URL || WORKER_BASE_URL === "https://verify-master-code-worker.channelfinderdata.workers.dev") {
+                masterCodeMessage.textContent = "Error: Worker URL not configured. Please update 'WORKER_BASE_URL' in the HTML.";
                 masterCodeMessage.style.color = '#ef4444';
-                return; // Stop execution if URL is not set
+                return;
             }
 
             try {
-                // Send the user's entered code to your Cloud Function for verification.
-                // The Cloud Function will handle the secure comparison.
-                const response = await fetch(CLOUD_FUNCTION_URL, {
+                // Call the Worker's verification endpoint
+                const response = await fetch(`${WORKER_BASE_URL}/verifyMasterCode`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ password: userEnteredCode }), // Send as 'password' to match Cloud Function's expectation
+                    body: JSON.stringify({ password: userEnteredCode }),
                 });
 
-                const data = await response.json(); // Parse the JSON response from the Cloud Function
+                const data = await response.json();
 
-                if (response.ok && data.success) { // Check if the Cloud Function returned success
+                if (response.ok && data.success) {
                     masterCodeMessage.textContent = "Success! Welcome to Alex's Media Server!";
-                    masterCodeMessage.style.color = '#10b981'; // Green color for success
-                    masterCodeInput.style.borderColor = '#10b981'; // Green border on success
+                    masterCodeMessage.style.color = '#10b981';
+                    masterCodeInput.style.borderColor = '#10b981';
 
-                    // Hide modal and show main content after a short delay
+                    storedMasterCode = userEnteredCode; // Store the successfully entered code for future requests
+
                     setTimeout(() => {
-                        masterCodeModal.classList.remove('show');
-                        mainContentWrapper.classList.remove('hidden-content');
-                        // Initialize 3D effects once content is visible
-                        initialize3DEffects(); // Call this to activate the interactive logos
-                    }, 700); // Give time for message to be read
+                        masterCodeModal.classList.remove('show'); // Hide the modal
+                        mainContentWrapper.classList.remove('hidden-content'); // Show main content
+                        initialize3DEffects(); // Activate 3D effects on logos
+                    }, 700);
 
                 } else {
-                    // If response is not OK or data.success is false, throw an error
                     throw new Error(data.message || "Authentication failed.");
                 }
 
             } catch (error) {
                 retryCount++;
-                console.error("Authentication error:", error); // Log error for debugging purposes
+                console.error("Authentication error:", error);
 
+                // Handle incorrect attempts and lock out after MAX_RETRIES
                 if (retryCount >= MAX_RETRIES) {
                     masterCodeMessage.textContent = "Too many incorrect attempts. Access denied.";
-                    masterCodeMessage.style.color = '#dc2626'; // Red color for error
-                    masterCodeInput.disabled = true; // Disable input
-                    submitMasterCodeBtn.disabled = true; // Disable button
-                    masterCodeInput.style.borderColor = '#dc2626'; // Red border for disabled input
+                    masterCodeMessage.style.color = '#dc2626';
+                    masterCodeInput.disabled = true;
+                    submitMasterCodeBtn.disabled = true;
+                    masterCodeInput.style.borderColor = '#dc2626';
                     submitMasterCodeBtn.classList.remove('bg-amber-600', 'hover:bg-amber-700');
-                    submitMasterCodeBtn.classList.add('bg-gray-500', 'cursor-not-allowed'); // Grey out button
+                    submitMasterCodeBtn.classList.add('bg-gray-500', 'cursor-not-allowed');
                 } else {
                     masterCodeMessage.textContent = `Incorrect code. ${MAX_RETRIES - retryCount} attempts remaining.`;
-                    masterCodeMessage.style.color = '#ef4444'; // Red color for error
-                    masterCodeInput.style.borderColor = '#ef4444'; // Red border for incorrect input
+                    masterCodeMessage.style.color = '#ef4444';
+                    masterCodeInput.style.borderColor = '#ef4444';
                 }
             }
         });
 
-        // Ensure modal is visible on page load and focus input
-        document.addEventListener('DOMContentLoaded', () => {
-            masterCodeModal.classList.add('show');
-            masterCodeInput.focus(); // Focus on the input field for immediate typing
+        // --- NEW: Event Listener for Service Links ---
+        serviceLinks.forEach(button => {
+            button.addEventListener('click', async (event) => {
+                event.preventDefault(); // Prevent default link behavior (e.g., if it was an <a> tag)
+
+                // IMPORTANT: Only proceed if the master code has been successfully stored (website unlocked)
+                if (!storedMasterCode) {
+                    // This scenario should theoretically not happen if the modal is a strict gate,
+                    // but it's a good safeguard.
+                    alert('Please unlock the server first by entering the master code!');
+                    return;
+                }
+
+                const serviceName = event.currentTarget.dataset.service; // Get the service name from data-service attribute
+
+                // Send request to the Worker's redirect endpoint
+                try {
+                    const response = await fetch(`${WORKER_BASE_URL}/redirect-service`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            password: storedMasterCode, // Send the stored master code for verification
+                            service: serviceName       // Send the requested service name
+                        }),
+                    });
+
+                    // Cloudflare Worker is designed to return a 302 Found status with the Location header
+                    // if the redirection is successful. The browser will automatically follow this redirect.
+                    if (response.status === 302) {
+                        // The browser automatically follows 302 redirects.
+                        // We don't need to do window.location.href here if the worker sends a 302.
+                        // However, if your worker was sending the URL in the JSON body,
+                        // you would extract it here:
+                        // const data = await response.json();
+                        // if (data.success && data.redirectUrl) {
+                        //    window.location.href = data.redirectUrl;
+                        // } else {
+                        //    alert(data.message || 'Failed to get redirect URL.');
+                        // }
+                        console.log(`Successfully requested redirect for service: ${serviceName}`);
+                    } else {
+                        // Handle cases where the Worker doesn't return a 302 (e.g., 401, 404, 500)
+                        const errorData = await response.json();
+                        alert(`Failed to access ${serviceName}: ${errorData.message || 'Unknown error'}`);
+                        console.error(`Failed to access ${serviceName}:`, errorData);
+                    }
+                } catch (error) {
+                    // Handle network errors or other unexpected issues
+                    alert(`An error occurred while trying to access ${serviceName}. Please try again.`);
+                    console.error(`Error accessing ${serviceName} service:`, error);
+                }
+            });
         });
     </script>
 </body>
