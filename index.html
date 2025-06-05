@@ -10,6 +10,7 @@
         /* Custom CSS to set the Inter font family */
         body {
             font-family: 'Inter', sans-serif;
+            overflow: hidden; /* Prevent scrolling when modal/blocked overlay is active */
         }
         /* Custom scrollbar for a cleaner look, matching the new palette */
         ::-webkit-scrollbar {
@@ -67,7 +68,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 1000; /* Modal overlay is above most content */
+            z-index: 1005; /* Modal overlay is above main content but below header */
             opacity: 0;
             visibility: hidden;
             transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
@@ -87,7 +88,7 @@
             position: relative;
             transform: translateY(-20px);
             transition: transform 0.3s ease-in-out;
-            z-index: 1001; /* Modal content is above the overlay and header */
+            z-index: 1010; /* Modal content is above the overlay */
         }
         .modal-overlay.show .modal-content {
             transform: translateY(0);
@@ -97,29 +98,65 @@
             display: none; /* Hide close button for mandatory entry */
         }
 
-        /* Style to hide main content initially */
-        .hidden-content {
+        /* Style to hide main content and modal initially */
+        .hidden-element {
             display: none;
         }
+
         /* Ensure header is positioned for z-index to work */
         header {
-            position: relative; /* Already set, but good to confirm */
-            z-index: 999; /* Header is above most content but below modal overlay */
+            position: relative;
+            z-index: 1000; /* Header is above blocked overlay and modal overlay */
+        }
+
+        /* New style for the full-screen IP blocked message */
+        .blocked-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.95); /* Even darker overlay */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1005; /* Same as modal overlay, ensuring it covers main content */
+            color: #ef4444; /* red-500 */
+            font-size: 2.5rem;
+            text-align: center;
+            padding: 2rem;
+            line-height: 1.5;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+        }
+        .blocked-overlay.show {
+            opacity: 1;
+            visibility: visible;
         }
     </style>
 </head>
 <body class="bg-gray-900 text-gray-100 min-h-screen flex flex-col">
+
+    <!-- Blocked IP Overlay - Initially Hidden -->
+    <div id="blockedIpOverlay" class="blocked-overlay hidden-element">
+        <h2 class="text-5xl font-bold mb-4">Access Denied!</h2>
+        <p>Your IP address has been blocked from entering this site due to repeated failed attempts.</p>
+        <p class="text-sm mt-4 text-gray-400">Please contact the administrator if you believe this is an error.</p>
+    </div>
+
     <!-- Header Section -->
     <header class="bg-gray-800 p-8 shadow-lg rounded-b-xl mx-4 mt-4 flex justify-center items-center relative">
         <h1 class="text-5xl font-bold text-amber-400">Alex's Media Server</h1>
         <!-- Version Number -->
         <div class="absolute top-4 right-4 text-gray-400 text-sm">
-            v1.0.2
+            v1.0.3
         </div>
     </header>
 
     <!-- Main Content Wrapper - Initially Hidden -->
-    <div id="mainContentWrapper" class="hidden-content flex-grow flex flex-col">
+    <div id="mainContentWrapper" class="flex-grow flex flex-col hidden-element">
         <main class="flex-grow container mx-auto p-4 md:p-8 space-y-12">
             <!-- Overseerr Section -->
             <section id="overseerr" class="bg-gray-800 p-6 md:p-10 rounded-xl shadow-xl border border-amber-700 hover:border-amber-500 transition-all duration-300 flex flex-col md:flex-row items-center justify-center md:justify-between space-y-6 md:space-y-0 md:space-x-10 overflow-hidden">
@@ -174,8 +211,8 @@
         </main>
     </div>
 
-    <!-- Master Code Modal -->
-    <div id="masterCodeModal" class="modal-overlay show"> <!-- 'show' class added by default -->
+    <!-- Master Code Modal - Initially Hidden -->
+    <div id="masterCodeModal" class="modal-overlay hidden-element">
         <div class="modal-content">
             <h3 class="text-2xl font-bold text-amber-400 mb-4">Access Alex's Media Server</h3>
             <p class="text-gray-300 mb-4">
@@ -192,24 +229,25 @@
     </div>
 
     <script type="module">
-        // Master Code Modal Logic
+        // Element references
+        const blockedIpOverlay = document.getElementById('blockedIpOverlay');
         const masterCodeModal = document.getElementById('masterCodeModal');
         const masterCodeInput = document.getElementById('masterCodeInput');
         const submitMasterCodeBtn = document.getElementById('submitMasterCode');
         const masterCodeMessage = document.getElementById('masterCodeMessage');
         const mainContentWrapper = document.getElementById('mainContentWrapper');
-        const serviceLinks = document.querySelectorAll('.service-link'); // Select all service buttons
+        const serviceLinks = document.querySelectorAll('.service-link');
 
         // IMPORTANT: This is the URL of your deployed Cloudflare Worker.
-        const WORKER_BASE_URL = "https://verify-master-code-worker.authme.workers.dev";
+        const WORKER_BASE_URL = "https://verify-master-code-worker.authme.workers.dev"; // Confirm this URL is correct
 
-        let storedMasterCode = ''; // To store the code after successful authentication
+        let storedMasterCode = '';
         let retryCount = 0;
         const MAX_RETRIES = 3;
 
         // Function to initialize 3D logo effects (called only after successful login)
         function initialize3DEffects() {
-            const sections = document.querySelectorAll('section'); // Query sections after content is visible
+            const sections = document.querySelectorAll('section');
 
             sections.forEach(section => {
                 const logoContainer = section.querySelector('.logo-3d-container');
@@ -241,13 +279,50 @@
             });
         }
 
+        // --- NEW: Function to check IP status on page load ---
+        async function checkIpStatus() {
+            try {
+                const response = await fetch(`${WORKER_BASE_URL}/checkIpStatus`, {
+                    method: 'POST', // Use POST as defined in Worker
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    // No body needed for this specific check, as IP is from CF-Connecting-IP
+                    body: JSON.stringify({}) // Send an empty JSON object for valid POST request
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.status === 'blocked') {
+                    // Show the blocked IP overlay
+                    blockedIpOverlay.classList.remove('hidden-element');
+                    blockedIpOverlay.classList.add('show');
+                    // Hide any other elements that might appear by default (like the modal)
+                    masterCodeModal.classList.add('hidden-element');
+                    masterCodeModal.classList.remove('show');
+                    mainContentWrapper.classList.add('hidden-element'); // Ensure main content is hidden
+                    document.body.style.overflow = 'hidden'; // Keep body fixed
+                } else {
+                    // IP is allowed, show the master code modal
+                    masterCodeModal.classList.remove('hidden-element');
+                    masterCodeModal.classList.add('show');
+                    document.body.style.overflow = 'hidden'; // Keep body fixed
+                }
+            } catch (error) {
+                console.error("Error checking IP status:", error);
+                // If there's an error checking IP status, default to showing the login modal
+                masterCodeMessage.textContent = "Error communicating with server. Please try again later.";
+                masterCodeMessage.style.color = '#ef4444';
+                masterCodeModal.classList.remove('hidden-element');
+                masterCodeModal.classList.add('show');
+                document.body.style.overflow = 'hidden'; // Keep body fixed
+            }
+        }
+
         // --- Event Listener for initial Master Code submission ---
         submitMasterCodeBtn.addEventListener('click', async () => {
             const userEnteredCode = masterCodeInput.value;
 
-            // Simple check to ensure the WORKER_BASE_URL is updated from its placeholder
-            // This placeholder check is now less critical as the URL is set.
-            // Still good for general debugging if it somehow reverts.
             if (!WORKER_BASE_URL) {
                 masterCodeMessage.textContent = "Error: Worker URL not configured.";
                 masterCodeMessage.style.color = '#ef4444';
@@ -255,7 +330,6 @@
             }
 
             try {
-                // Call the Worker's verification endpoint
                 const response = await fetch(`${WORKER_BASE_URL}/verifyMasterCode`, {
                     method: 'POST',
                     headers: {
@@ -271,12 +345,14 @@
                     masterCodeMessage.style.color = '#10b981';
                     masterCodeInput.style.borderColor = '#10b981';
 
-                    storedMasterCode = userEnteredCode; // Store the successfully entered code for future requests
+                    storedMasterCode = userEnteredCode;
 
                     setTimeout(() => {
-                        masterCodeModal.classList.remove('show'); // Hide the modal
-                        mainContentWrapper.classList.remove('hidden-content'); // Show main content
-                        initialize3DEffects(); // Activate 3D effects on logos
+                        masterCodeModal.classList.remove('show');
+                        masterCodeModal.classList.add('hidden-element'); // Ensure it's fully hidden
+                        mainContentWrapper.classList.remove('hidden-element'); // Show main content
+                        document.body.style.overflow = 'auto'; // Allow scrolling on main content
+                        initialize3DEffects();
                     }, 700);
 
                 } else {
@@ -287,15 +363,26 @@
                 retryCount++;
                 console.error("Authentication error:", error);
 
-                // Handle incorrect attempts and lock out after MAX_RETRIES
                 if (retryCount >= MAX_RETRIES) {
-                    masterCodeMessage.textContent = "Too many incorrect attempts. Access denied.";
+                    masterCodeMessage.textContent = "Too many incorrect attempts. Your IP has been blocked.";
                     masterCodeMessage.style.color = '#dc2626';
                     masterCodeInput.disabled = true;
                     submitMasterCodeBtn.disabled = true;
                     masterCodeInput.style.borderColor = '#dc2626';
                     submitMasterCodeBtn.classList.remove('bg-amber-600', 'hover:bg-amber-700');
                     submitMasterCodeBtn.classList.add('bg-gray-500', 'cursor-not-allowed');
+
+                    // If IP is blocked by worker, immediately transition to blocked overlay
+                    if (error.message.includes('Your IP has been blocked')) {
+                        setTimeout(() => {
+                            masterCodeModal.classList.remove('show');
+                            masterCodeModal.classList.add('hidden-element');
+                            blockedIpOverlay.classList.remove('hidden-element');
+                            blockedIpOverlay.classList.add('show');
+                            document.body.style.overflow = 'hidden'; // Ensure body remains fixed
+                        }, 700);
+                    }
+
                 } else {
                     masterCodeMessage.textContent = `Incorrect code. ${MAX_RETRIES - retryCount} attempts remaining.`;
                     masterCodeMessage.style.color = '#ef4444';
@@ -307,17 +394,15 @@
         // --- Event Listener for Service Links ---
         serviceLinks.forEach(button => {
             button.addEventListener('click', async (event) => {
-                event.preventDefault(); // Prevent default link behavior
+                event.preventDefault();
 
-                // IMPORTANT: Only proceed if the master code has been successfully stored (website unlocked)
                 if (!storedMasterCode) {
                     alert('Please unlock the server first by entering the master code!');
                     return;
                 }
 
-                const serviceId = event.currentTarget.dataset.service; // Get the service ID from data-service attribute
+                const serviceId = event.currentTarget.dataset.service;
 
-                // Send request to the Worker's redirect endpoint
                 try {
                     const response = await fetch(`${WORKER_BASE_URL}/redirect-service`, {
                         method: 'POST',
@@ -325,29 +410,29 @@
                             'Content-Type': 'application/json',
                         },
                         body: JSON.stringify({
-                            password: storedMasterCode, // Send the stored master code for verification
-                            serviceId: serviceId       // Send the requested service ID
+                            password: storedMasterCode,
+                            serviceId: serviceId
                         }),
                     });
 
-                    const data = await response.json(); // Always parse JSON as the Worker now returns it
+                    const data = await response.json();
 
                     if (response.ok && data.success && data.redirectUrl) {
-                        // Open the received URL in a new tab
                         window.open(data.redirectUrl, '_blank');
                         console.log(`Successfully opened service (ID: ${serviceId}) in new tab.`);
                     } else {
-                        // Handle cases where Worker returns success:false or missing redirectUrl
                         alert(`Failed to access service (ID: ${serviceId}): ${data.message || 'Unknown error'}`);
                         console.error(`Failed to access service (ID: ${serviceId}):`, data);
                     }
                 } catch (error) {
-                    // Handle network errors or other unexpected issues
                     alert(`An error occurred while trying to access service (ID: ${serviceId}). Please try again.`);
                     console.error(`Error accessing service (ID: ${serviceId}):`, error);
                 }
             });
         });
+
+        // --- Initial IP Status Check on page load ---
+        document.addEventListener('DOMContentLoaded', checkIpStatus);
     </script>
 </body>
 </html>
