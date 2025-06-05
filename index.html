@@ -67,7 +67,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 1000;
+            z-index: 1000; /* Modal overlay is above most content */
             opacity: 0;
             visibility: hidden;
             transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
@@ -87,6 +87,7 @@
             position: relative;
             transform: translateY(-20px);
             transition: transform 0.3s ease-in-out;
+            z-index: 1001; /* Modal content is above the overlay and header */
         }
         .modal-overlay.show .modal-content {
             transform: translateY(0);
@@ -99,6 +100,11 @@
         /* Style to hide main content initially */
         .hidden-content {
             display: none;
+        }
+        /* Ensure header is positioned for z-index to work */
+        header {
+            position: relative; /* Already set, but good to confirm */
+            z-index: 999; /* Header is above most content but below modal overlay */
         }
     </style>
 </head>
