@@ -114,7 +114,7 @@
         <h1 class="text-5xl font-bold text-amber-400">Alex's Media Server</h1>
         <!-- Version Number -->
         <div class="absolute top-4 right-4 text-gray-400 text-sm">
-            v1.0.1
+            v1.0.2
         </div>
     </header>
 
@@ -201,7 +201,6 @@
         const serviceLinks = document.querySelectorAll('.service-link'); // Select all service buttons
 
         // IMPORTANT: This is the URL of your deployed Cloudflare Worker.
-        // This URL has been updated based on your input.
         const WORKER_BASE_URL = "https://verify-master-code-worker.authme.workers.dev";
 
         let storedMasterCode = ''; // To store the code after successful authentication
@@ -247,8 +246,10 @@
             const userEnteredCode = masterCodeInput.value;
 
             // Simple check to ensure the WORKER_BASE_URL is updated from its placeholder
-            if (!WORKER_BASE_URL || WORKER_BASE_URL === "https://verify-master-code-worker.channelfinderdata.workers.dev") {
-                masterCodeMessage.textContent = "Error: Worker URL not configured. Please update 'WORKER_BASE_URL' in the HTML.";
+            // This placeholder check is now less critical as the URL is set.
+            // Still good for general debugging if it somehow reverts.
+            if (!WORKER_BASE_URL) {
+                masterCodeMessage.textContent = "Error: Worker URL not configured.";
                 masterCodeMessage.style.color = '#ef4444';
                 return;
             }
@@ -303,15 +304,13 @@
             }
         });
 
-        // --- NEW: Event Listener for Service Links ---
+        // --- Event Listener for Service Links ---
         serviceLinks.forEach(button => {
             button.addEventListener('click', async (event) => {
-                event.preventDefault(); // Prevent default link behavior (e.g., if it was an <a> tag)
+                event.preventDefault(); // Prevent default link behavior
 
                 // IMPORTANT: Only proceed if the master code has been successfully stored (website unlocked)
                 if (!storedMasterCode) {
-                    // This scenario should theoretically not happen if the modal is a strict gate,
-                    // but it's a good safeguard.
                     alert('Please unlock the server first by entering the master code!');
                     return;
                 }
@@ -331,16 +330,16 @@
                         }),
                     });
 
-                    // Cloudflare Worker is designed to return a 302 Found status with the Location header
-                    // if the redirection is successful. The browser will automatically follow this redirect.
-                    if (response.status === 302) {
-                        console.log(`Successfully requested redirect for service ID: ${serviceId}`);
-                        // The browser will handle the redirect automatically due to the 302 status code and Location header.
+                    const data = await response.json(); // Always parse JSON as the Worker now returns it
+
+                    if (response.ok && data.success && data.redirectUrl) {
+                        // Open the received URL in a new tab
+                        window.open(data.redirectUrl, '_blank');
+                        console.log(`Successfully opened service (ID: ${serviceId}) in new tab.`);
                     } else {
-                        // Handle cases where the Worker doesn't return a 302 (e.g., 401, 404, 500)
-                        const errorData = await response.json();
-                        alert(`Failed to access service (ID: ${serviceId}): ${errorData.message || 'Unknown error'}`);
-                        console.error(`Failed to access service (ID: ${serviceId}):`, errorData);
+                        // Handle cases where Worker returns success:false or missing redirectUrl
+                        alert(`Failed to access service (ID: ${serviceId}): ${data.message || 'Unknown error'}`);
+                        console.error(`Failed to access service (ID: ${serviceId}):`, data);
                     }
                 } catch (error) {
                     // Handle network errors or other unexpected issues
